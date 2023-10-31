@@ -44,15 +44,22 @@ class DataProcessingService:
             
             filing = {'ticker': ticker, 'type': type, 'file': file}
 
-            # find quarter end date
-            quarter_end_date = self._find_quarter_end_date(soup)
-            filing['quarter_end_date'] = quarter_end_date if quarter_end_date else 'NA'
+            # find end date
+            if type == '10-K':
+                fiscal_year_end_date = self._find_end_date(soup, 'For the Fiscal Year Ended')
+                filing['fiscal_year_end_date'] = fiscal_year_end_date.replace('For the Fiscal Year Ended ', "") if fiscal_year_end_date else 'NA'
+
+            elif type == '10-Q':
+                quarter_end_date = self._find_end_date(soup, 'For the Quarter Ended')
+                filing['quarter_end_date'] = quarter_end_date.replace('For the Quarter Ended ', "") if quarter_end_date else 'NA'
 
             # find model values 
             for key in self.config.model_values:
                 filing[key] = self._parse_table(soup, key)
 
             filings.append(filing)
+
+        return filings
             
 
     def _parse_table(self, soup, key):
@@ -63,7 +70,7 @@ class DataProcessingService:
             for value in table_values:
                 row = self._find_row_with_text(table_table, value)
                 if row is not None:
-                    table[value] = row
+                    table[value] = self._strip_row(value, row.text)
                 else:
                     table[value] = 'NA'
         else:
@@ -71,15 +78,19 @@ class DataProcessingService:
                 table[value] = 'NA'
         return table
 
+    
+    def _strip_row(self, value, str):
+        return re.sub(value, '', str.replace('\n', '')).replace('$', '').replace('\xa0', ' ').replace(',', '').replace(chr(8217), '').replace('(', "").replace(")", "").strip().split(' ')[0]
 
-    def _find_quarter_end_date(soup):
-        p_tag = soup.find(string=re.compile("For the Quarter Ended"))
+
+    def _find_end_date(self, soup, str):
+        p_tag = soup.find(string=re.compile(str))
         if p_tag:
             return p_tag
         else:
             return None
     
-    def _find_table_after_id(soup, id):
+    def _find_table_after_id(self, soup, id):
         p_tag = soup.find(id=id)
         if p_tag:
             table = p_tag.find_next('table')
@@ -87,9 +98,9 @@ class DataProcessingService:
         else:
             return None
 
-    def _find_row_with_text(table, text):
+    def _find_row_with_text(self, table, text):
         rows = table.find_all('tr')
         for row in rows:
-            if text in row.text:
+            if re.search(text, row.text):
                 return row
         return None
