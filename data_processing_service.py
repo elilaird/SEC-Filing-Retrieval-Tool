@@ -1,13 +1,24 @@
-import requests
-from bs4 import BeautifulSoup
 import re
 import os
+from bs4 import BeautifulSoup
+from pymongo import MongoClient
 from sec_edgar_downloader import Downloader
+from database_service import DatabaseService
 
 
 class DataProcessingService:
     def __init__(self, config):
         self.config = config
+
+        # connect to mongodb
+        self.client = MongoClient(f'mongodb://{self.config.db_user}:{self.config.db_password}@{self.config.db_host}:{self.config.db_port}')
+        self.db = self.client[self.config.db_name]
+        self.collection = self.db[self.config.collection]
+
+        # set up database service
+        self.db_service = DatabaseService(self.config)
+
+        # set up downloader
         self.dl = Downloader(self.config.company, self.config.email)
         self.cache_dir = self.config.cache_dir
     
@@ -20,7 +31,7 @@ class DataProcessingService:
             print(f"Exception: {e}")
             return False
     
-    def get_and_parse(self, ticker, type):
+    def parse_filing(self, ticker, type):
         
         # check if local files exist in cache directory
         assert ticker in os.listdir(self.cache_dir), f"No local files found for {ticker}"
@@ -31,6 +42,8 @@ class DataProcessingService:
         filings = []
         # parse each file
         for file in os.listdir(os.path.join(self.cache_dir, ticker, type)):
+            if file == '.DS_Store':
+                continue
             soup = None
             try:
                 with open(os.path.join(self.cache_dir, ticker, type, file, 'full-submission.txt'), 'r', encoding='utf-8', errors='ignore') as f:
@@ -46,7 +59,7 @@ class DataProcessingService:
 
             # find end date
             if type == '10-K':
-                fiscal_year_end_date = self._find_end_date(soup, 'For the Fiscal Year Ended')
+                fiscal_year_end_date = self._find_fiscal_year(soup, 'For the Fiscal Year Ended')
                 filing['fiscal_year_end_date'] = fiscal_year_end_date.replace('For the Fiscal Year Ended ', "") if fiscal_year_end_date else 'NA'
 
             elif type == '10-Q':
@@ -61,6 +74,23 @@ class DataProcessingService:
 
         return filings
             
+    # def save_filings(self, filings):
+    #     for filing in filings:
+    #         try:
+    #             self.collection.insert_one(filing)
+    #         except Exception as e:
+    #             print(f"Failed to save filing {filing}")
+    #             print(f"Exception: {e}")
+    #             continue
+        
+    def save_filings(self, filings):
+        for filing in filings:
+            try:
+                self.db_service.insert_filing(filing)
+            except Exception as e:
+                print(f"Failed to save filing {filing}")
+                print(f"Exception: {e}")
+                continue
 
     def _parse_table(self, soup, key):
         table = {}
@@ -87,6 +117,14 @@ class DataProcessingService:
         p_tag = soup.find(string=re.compile(str))
         if p_tag:
             return p_tag
+        else:
+            return None
+        
+    def _find_fiscal_year(self, soup, str):
+        p_tag = soup.find('p', string=re.compile(str))
+        text = p_tag.text
+        if text:
+            return text
         else:
             return None
     
