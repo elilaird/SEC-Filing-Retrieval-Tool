@@ -1,4 +1,4 @@
-from pymongo import MongoClient
+from pymongo import MongoClient, ASCENDING, errors
 
 class DatabaseService:
     def __init__(self, config):
@@ -6,14 +6,22 @@ class DatabaseService:
         self.db = self.client[config.db_name]
         self.collection = self.db[config.collection]
 
+        self.collection.create_index([('ticker', ASCENDING), ('type', ASCENDING), ('period_end_date', ASCENDING)], unique=True)
+
     def insert_filing(self, filing):
-        self.collection.insert_one(filing)
+        try:
+            self.collection.insert_one(filing)
+        except errors.DuplicateKeyError:
+            print("Duplicate document, skipping insert.")
 
     def get_all_filings(self):
         return list(self.collection.find())
 
     def get_filings_by_ticker(self, ticker):
         return list(self.collection.find({'ticker': ticker}))
+    
+    def get_filings_by_ticker_and_type(self, ticker, type):
+        return list(self.collection.find({'ticker': ticker, 'type': type}))
 
     def delete_filing(self, filing_id):
         self.collection.delete_one({'_id': filing_id})

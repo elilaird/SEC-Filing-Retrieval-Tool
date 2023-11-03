@@ -60,11 +60,11 @@ class DataProcessingService:
             # find end date
             if type == '10-K':
                 fiscal_year_end_date = self._find_fiscal_year(soup, 'For the Fiscal Year Ended')
-                filing['fiscal_year_end_date'] = fiscal_year_end_date.replace('For the Fiscal Year Ended ', "") if fiscal_year_end_date else 'NA'
+                filing['period_end_date'] = fiscal_year_end_date.replace('For the Fiscal Year Ended ', "") if fiscal_year_end_date else 'NA'
 
             elif type == '10-Q':
                 quarter_end_date = self._find_end_date(soup, 'For the Quarter Ended')
-                filing['quarter_end_date'] = quarter_end_date.replace('For the Quarter Ended ', "") if quarter_end_date else 'NA'
+                filing['period_end_date'] = quarter_end_date.replace('For the Quarter Ended ', "") if quarter_end_date else 'NA'
 
             # find model values 
             for key in self.config.model_values:
@@ -74,14 +74,6 @@ class DataProcessingService:
 
         return filings
             
-    # def save_filings(self, filings):
-    #     for filing in filings:
-    #         try:
-    #             self.collection.insert_one(filing)
-    #         except Exception as e:
-    #             print(f"Failed to save filing {filing}")
-    #             print(f"Exception: {e}")
-    #             continue
         
     def save_filings(self, filings):
         for filing in filings:
@@ -129,9 +121,10 @@ class DataProcessingService:
             return None
     
     def _find_table_after_id(self, soup, id):
-        p_tag = soup.find(id=id)
+        #p_tag = soup.find(id=id)
+        p_tag = soup.find_all('p', id=re.compile(id, re.IGNORECASE))
         if p_tag:
-            table = p_tag.find_next('table')
+            table = p_tag[0].find_next('table')
             return table
         else:
             return None

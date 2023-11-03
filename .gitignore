@@ -1,0 +1,16 @@
+# DS_Store
+*.DS_Store
+
+*.html
+*.css
+*.txt
+
+__pycache__/
+
+#mongo backups
+db/
+
+# local filings
+cache/
+
+*_files/
