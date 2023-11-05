@@ -31,3 +31,5 @@ config.model_values = {
     'cash_flows_statements': config.cash_flow_values,
     'stockholders_equity_statements': config.stockholders_equity_values
 }
+
+config.model_save_directory = 'models'

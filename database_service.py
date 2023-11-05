@@ -21,7 +21,7 @@ class DatabaseService:
         return list(self.collection.find({'ticker': ticker}))
     
     def get_filings_by_ticker_and_type(self, ticker, type):
-        return list(self.collection.find({'ticker': ticker, 'type': type}))
+        return list(self.collection.find({'ticker': ticker, 'type': type, 'period_end_date': {'$ne': 'NA'}}))
     
     def check_exists(self, ticker, type, period_end_date, file):
         if self.collection.find_one({'ticker': ticker, 'type': type, 'period_end_date': period_end_date, 'file': file}):

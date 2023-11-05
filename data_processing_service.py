@@ -120,7 +120,7 @@ class DataProcessingService:
                     if filing['income_statements']['total_revenue'] is None:
                         if self._is_in_table(table_df, 'Total Revenues'):
                             row = self._find_row_in_table(table_df, 'Total Revenues')
-                            filing['income_statements']['total_revenue'] = self._get_first_digit(row)
+                            filing['income_statements']['total_revenue'] = self._get_first_digit(row) * 1e6 if self._get_first_digit(row) is not None else None
                 except Exception as e:
                     print(f"Error finding total revenue: {e}")
 
@@ -128,7 +128,7 @@ class DataProcessingService:
                     if filing['income_statements']['net_income'] is None:
                         if self._is_in_table(table_df, 'Net Income'):
                             row = self._find_row_in_table(table_df, 'Net Income')
-                            filing['income_statements']['net_income'] = self._get_first_digit(row)
+                            filing['income_statements']['net_income'] = self._get_first_digit(row) * 1e6 if self._get_first_digit(row) is not None else None
                 except Exception as e:
                     print(f"Error finding net income: {e}")
 
@@ -136,7 +136,7 @@ class DataProcessingService:
                     if filing['balance_sheets']['total_assets'] is None:
                         if self._is_in_table(table_df, 'Total Assets'):
                             row = self._find_row_in_table(table_df, 'Total Assets')
-                            filing['balance_sheets']['total_assets'] = self._get_first_digit(row)
+                            filing['balance_sheets']['total_assets'] = self._get_first_digit(row) * 1e6 if self._get_first_digit(row) is not None else None
                 except Exception as e:
                     print(f"Error finding total assets equity: {e}")
     
@@ -144,7 +144,7 @@ class DataProcessingService:
                     if filing['balance_sheets']['total_liabilities'] is None:
                         if self._is_in_table(table_df, 'Total Liabilities'):
                             row = self._find_row_in_table(table_df, 'Total Liabilities')
-                            filing['balance_sheets']['total_liabilities'] = self._get_first_digit(row)
+                            filing['balance_sheets']['total_liabilities'] = self._get_first_digit(row) * 1e6 if self._get_first_digit(row) is not None else None
                 except Exception as e:
                     print(f"Error finding total liabilities: {e}")
 
@@ -152,7 +152,7 @@ class DataProcessingService:
                     if filing['balance_sheets']['total_stockholders_equity'] is None:
                         if self._is_in_table(table_df, 'Total Stockholders\' Equity'):
                             row = self._find_row_in_table(table_df, 'Total Stockholders\' Equity')
-                            filing['balance_sheets']['total_stockholders_equity'] = self._get_first_digit(row)
+                            filing['balance_sheets']['total_stockholders_equity'] = self._get_first_digit(row) * 1e6 if self._get_first_digit(row) is not None else None
                 except Exception as e:
                     print(f"Error finding total stockholders' equity: {e}")
                         
