@@ -40,7 +40,10 @@ class AnalyticsService():
         next_year = datetime.now().year + 1
         prediction = model.predict([[next_year]])
 
-        return prediction[0]
+        # make dataframe for results
+        results = pd.DataFrame({'Date': [next_year], target_variable: prediction[0]})
+
+        return results
     
     def stats_yearly_by_company(self, ticker):
 
@@ -89,11 +92,14 @@ class AnalyticsService():
         model = LinearRegression()
         model.fit(X, y)
 
-        # predict next year
-        next_year = datetime.now().year + 1
-        prediction = model.predict([[next_year]])
+        # predict next quarter
+        next_quarter = datetime.now().year + (datetime.now().month / 12) + 0.25
+        prediction = model.predict([[next_quarter]])
 
-        return prediction[0]
+        # make dataframe for results
+        results = pd.DataFrame({'Date': [next_quarter], target_variable: prediction[0]})
+
+        return results
     
     def get_dataframe(self, ticker):
         # get all filings for ticker

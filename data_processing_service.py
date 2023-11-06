@@ -7,6 +7,7 @@ from pymongo import MongoClient
 from sec_edgar_downloader import Downloader
 from database_service import DatabaseService
 import copy
+from datetime import datetime
 
 
 _base_filing = {
@@ -79,15 +80,17 @@ class DataProcessingService:
             filing['type'] = type
             filing['file'] = file
             
-            # find end date
-            if type == '10-K':
-                fiscal_year_end_date = self._find_fiscal_year(soup, 'For the Fiscal Year Ended')#'For the Fiscal Year Ended')
-                #filing['period_end_date'] = fiscal_year_end_date.replace('For the Fiscal Year Ended ', "") if fiscal_year_end_date else 'NA'
-                filing['period_end_date'] = re.sub('For the Fiscal Year Ended ', "", fiscal_year_end_date, flags=re.IGNORECASE).replace('\xa0', ' ').strip() if fiscal_year_end_date else 'NA'
+            filing['period_end_date'] = self._get_submission_date(os.path.join(self.cache_dir, ticker, type, file, 'full-submission.txt'))
 
-            elif type == '10-Q':
-                quarter_end_date = self._find_end_date(soup, 'For the Quarter(ly)? (period)? ')
-                filing['period_end_date'] = re.sub('For the Quarter(ly)? (period)? (ended)?', "", quarter_end_date, flags=re.IGNORECASE).replace('\xa0', ' ').strip() if quarter_end_date else 'NA'
+            # find end date
+            # if type == '10-K':
+            #     fiscal_year_end_date = self._find_fiscal_year(soup, 'For the Fiscal Year Ended')#'For the Fiscal Year Ended')
+            #     #filing['period_end_date'] = fiscal_year_end_date.replace('For the Fiscal Year Ended ', "") if fiscal_year_end_date else 'NA'
+            #     filing['period_end_date'] = re.sub('For the Fiscal Year Ended ', "", fiscal_year_end_date, flags=re.IGNORECASE).replace('\xa0', ' ').strip() if fiscal_year_end_date else 'NA'
+
+            # elif type == '10-Q':
+            #     quarter_end_date = self._find_end_date(soup, 'For the Quarter(ly)? (period)? ')
+            #     filing['period_end_date'] = re.sub('For the Quarter(ly)? (period)? (ended)?', "", quarter_end_date, flags=re.IGNORECASE).replace('\xa0', ' ').strip() if quarter_end_date else 'NA'
 
             print("\n------------------------\n")
             print(f"Processing {type} {filing['period_end_date']} for {ticker}...")
@@ -98,9 +101,6 @@ class DataProcessingService:
                 print(f"Filing {ticker} {type} {filing['period_end_date']} already exists, skipping.")
                 continue
 
-            # find model values 
-            # for key in self.config.model_values:
-            #     filing[key] = self._parse_table(soup, key)
             # find all tables
             all_tables = soup.find_all('table')
             for table in all_tables:
@@ -162,6 +162,24 @@ class DataProcessingService:
 
         return filings
             
+
+    def _get_submission_date(self, file):
+        # Open the file
+        try:
+            with open(file, 'r') as file:
+                # Loop through each line in the file
+                for line in file:
+                    # If the line contains the string you're interested in, print it and the next line
+                    if 'CONFORMED PERIOD OF REPORT:' in line:
+                        line = line.replace('\n', '').replace('\t', '')
+                        date = re.sub('CONFORMED PERIOD OF REPORT:', "", line)
+                        date = datetime.strptime(date, '%Y%m%d')
+                        return date.strftime('%B %d, %Y')
+        except Exception as e:
+            print(f"Failed to get submission date for {file}")
+            print(f"Exception: {e}")
+            return 'NA'
+
     def _get_first_digit(self, row):
         for value in row:
             if isinstance(value, str):

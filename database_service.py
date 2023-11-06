@@ -21,7 +21,7 @@ class DatabaseService:
         return list(self.collection.find({'ticker': ticker, 'period_end_date': {'$ne': 'NA'}}))
 
     def get_filings_by_ticker(self, ticker):
-        return list(self.collection.find({'ticker': ticker}))
+        return list(self.collection.find({'ticker': ticker, 'period_end_date': {'$ne': 'NA'}}))
     
     def get_filings_by_ticker_and_type(self, ticker, type):
         return list(self.collection.find({'ticker': ticker, 'type': type, 'period_end_date': {'$ne': 'NA'}}))
@@ -30,6 +30,12 @@ class DatabaseService:
         if self.collection.find_one({'ticker': ticker, 'type': type, 'period_end_date': period_end_date, 'file': file}):
             return True
         else: 
+            return False
+        
+    def ticker_exists(self, ticker):
+        if self.collection.find_one({'ticker': ticker}):
+            return True
+        else:
             return False
 
     def delete_filing(self, filing_id):
