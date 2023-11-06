@@ -16,6 +16,9 @@ class DatabaseService:
 
     def get_all_filings(self):
         return list(self.collection.find())
+    
+    def get_filings_by_company(self, ticker):
+        return list(self.collection.find({'ticker': ticker, 'period_end_date': {'$ne': 'NA'}}))
 
     def get_filings_by_ticker(self, ticker):
         return list(self.collection.find({'ticker': ticker}))
