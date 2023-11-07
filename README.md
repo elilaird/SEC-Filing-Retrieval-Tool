@@ -26,6 +26,10 @@ __Key Services:__
 ### Selected Architecture UML Diagram
 ![UML Diagram](./service-based-uml.svg)
 
+## Changes From Proposal
+- In the proposal, I planned on reading the SEC filings from an RSS feed. This proved to be more difficult than expected, so I decided to use a package named `sec_edgar_downloader` [repo](https://github.com/jadchaar/sec-edgar-downloader) to download the html files for each company. I then used the BeautifulSoup python package to manually parse the tables from the html files.
+- I also provided an example of a financial model that had many different values. I simplified the model to only include values that were consistent across company reports. This made the model easier to read and understand (as shown in example at the bottom of this page).
+
 ### Comparison Between Selected (Service-based) and Alternative Designs (Pipeline)
 __Pipeline Architecture:__
   - _Sequential Data Handling:_ The data flow is segmented into different components or stages, each responsible for specific processing steps, resulting in a sequential flow.
