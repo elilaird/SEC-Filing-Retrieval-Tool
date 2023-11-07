@@ -67,6 +67,7 @@ __Rationale for Choosing the Service-based Architecture:__
     - `conda activate secdoc`
 4. Install requirements
     - `pip install -r requirements.txt`
+    - `conda install -y lxml`
 
 #### MongoDB Setup
 1. `docker-compose up -d`
