@@ -62,7 +62,7 @@ __Rationale for Choosing the Service-based Architecture:__
 1. Clone the repository
    - `git clone <repo>`
 2. Create conda environment
-    - `conda env create --name secdoc python=3.10`
+    - `conda create --name secdoc python=3.10`
 3. Activate conda environment
     - `conda activate secdoc`
 4. Install requirements
