@@ -3,7 +3,6 @@
 
 *.html
 *.css
-*.txt
 
 __pycache__/
 

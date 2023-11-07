@@ -1,0 +1,16 @@
+beautifulsoup4>=4.12
+easydict
+graphviz
+html5lib
+joblib
+lxml
+numpy
+pandas
+py-xbrl
+pymongo
+requests
+scikit-learn
+sec-edgar-downloader
+urllib3
+webencodings
+XlsxWriter==3.1.9
