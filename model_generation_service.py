@@ -10,12 +10,19 @@ class ModelGenerationService():
     
     def generate_model(self, ticker):
 
+        # check if ticker exists in database
+        if not self.db.ticker_exists(ticker):
+            print(f"Ticker {ticker} not found in database")
+            return None
+
         # get all filings for ticker
         yearly_reports = self.db.get_filings_by_ticker_and_type(ticker, '10-K')
         quarterly_reports = self.db.get_filings_by_ticker_and_type(ticker, '10-Q')
         all_reports = yearly_reports + quarterly_reports
         print(f"found {len(yearly_reports)} yearly reports for {ticker}")
         print(f"found {len(quarterly_reports)} quarterly reports for {ticker}")
+
+
 
         # get dates
         dates = []
@@ -38,16 +45,16 @@ class ModelGenerationService():
             worksheet.set_column('G:Z', 7)
         except Exception as e:
             print(f"Error opening excel document: {e}")
-            return
+            return None
         
+        worksheet.write(0, 0, f"{ticker} Financial Model")
         self._write_dates(worksheet, dates)
         self._write_template(worksheet)
         self._write_numbers(worksheet, all_reports)
 
-
-
-
         workbook.close()
+
+        return True
 
     def _write_template(self, worksheet):
         worksheet.write(4, 0, 'Balance Sheet')
