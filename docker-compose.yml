@@ -12,34 +12,7 @@ services:
       MONGO_INITDB_DATABASE: financials
     ports:
       - '27017:27017'
-    # networks:
-    #   - mongo-compose-network
-    # env_file:
-    #   - .env
     volumes:
       - ./db:/db-dump
       - ./db/data:/data/db
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-
-  # mongo-express:
-  #   container_name: mongo-express-dev
-  #   image: mongo-express
-  #   depends_on:
-  #     - db
-  #   restart: always
-  #   ports:
-  #     - 8081:8081
-  #   networks:
-  #     - mongo-compose-network
-  #   environment:
-  #     ME_CONFIG_MONGODB_SERVER: mongo-dev
-  #     ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ROOT_USER}
-  #     ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD}
-  #     ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_USER}
-  #     ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_PASSWORD}
-  #   env_file:
-  #     - .env
-
-# networks:
-#   mongo-compose-network:
-#     external: true
